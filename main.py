@@ -100,7 +100,7 @@ def setup_rclone():
 def upload_rclone(output_path_local='output', output_path_remote='output'):
     r_name = config['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME']
 
-    command = f"rclone copy -v " \
+    command = f"rclone copy --progress --ignore-existing " \
               f"'{output_path_local}' '{r_name}:{output_path_remote}'"
 
     # execute the upload command
@@ -150,6 +150,8 @@ if __name__ == '__main__':
         for t in upload_times:
             ts.add(Task(t, download_ilias_data))
         ts.start()
+
+        upload_rclone("output", config['ILIAS_DOWNLOADER_OUTPUT_PATH'])
 
         # wait until manually stopped
         Event().wait()
