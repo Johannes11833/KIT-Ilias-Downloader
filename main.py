@@ -5,8 +5,8 @@ from threading import Event
 from typing import Dict
 
 from dotenv import load_dotenv
+from simple_term_menu import TerminalMenu
 
-from cloud.cloud_uploader import CloudUploader
 from scheduler import TimeScheduler, Task
 
 
@@ -20,11 +20,15 @@ def load_config() -> Dict:
     key_defaults = [
         ['ILIAS_DOWNLOADER_USER_NAME', None],
         ['ILIAS_DOWNLOADER_PASSWORD', None],
-        ['ILIAS_DOWNLOADER_OUTPUT_PATH', './output'],
+        ['ILIAS_DOWNLOADER_OUTPUT_PATH', 'output'],
         ['ILIAS_DOWNLOADER_SYNC_URL', None],
         ['ILIAS_DOWNLOADER_JOBS', 10],
         ['ILIAS_DOWNLOADER_RATE', 100],
         ['ILIAS_DOWNLOADER_USE_KEY_RING', False],
+        ['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME', 'cloud-drive'],
+        ['ILIAS_DOWNLOADER_CLIENT_ID', None],
+        ['ILIAS_DOWNLOADER_CLIENT_SECRET', None],
+        ['ILIAS_DOWNLOADER_UPLOAD_TIMES', '00:00'],
     ]
 
     # load the environment variables
@@ -39,7 +43,7 @@ def download_ilias_data():
     command = f"~/.cargo/bin/KIT-ILIAS-downloader" \
               f" -U {config['ILIAS_DOWNLOADER_USER_NAME']}" \
               f" -P \"{config['ILIAS_DOWNLOADER_PASSWORD']}\"" \
-              f" -o \"{config['ILIAS_DOWNLOADER_OUTPUT_PATH']}\"" \
+              f" -o \"output\"" \
               f" --jobs  {config['ILIAS_DOWNLOADER_JOBS']}" \
               f" --rate {config['ILIAS_DOWNLOADER_RATE']}"
 
@@ -49,8 +53,60 @@ def download_ilias_data():
     # execute the command
     subprocess.run(command, shell=True)
 
-    # upload the files to the cloud
-    db.upload_new_files('./ilias')
+    logging.info('Download from ilias completed. Starting upload to the cloud...')
+
+    # upload the new file
+    upload_rclone("output", config['ILIAS_DOWNLOADER_OUTPUT_PATH'])
+
+
+def setup_rclone():
+    r_name = config['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME']
+
+    # get the available remotes
+    remotes = subprocess.check_output('rclone listremotes', shell=True, encoding='UTF-8').split()
+
+    if f"{r_name}:" not in remotes:
+        # setup is not yet complete
+        options = ["Yes (start interactive setup)", "No (terminate)"]
+        terminal_menu = TerminalMenu(options, title=f'The remote \'{r_name}\' has not been set up yet. Set it up now?')
+        index = terminal_menu.show()
+
+        if index == 0:
+            options_display = ['GoogleDrive', 'Dropbox', 'OneDrive', "Other (manual setup rclone)"]
+            options = ["drive", 'dropbox', 'onedrive', None]
+            terminal_menu = TerminalMenu(options_display, title=f'Choose a cloud provider.')
+            index = terminal_menu.show()
+            if index < len(options) - 1:
+                # setup google drive
+                command = f"rclone config create '{r_name}' {options[index]}"
+
+                if config['ILIAS_DOWNLOADER_CLIENT_ID'] and config['ILIAS_DOWNLOADER_CLIENT_SECRET']:
+                    command += f" --{options[index]}-client-id '{config['ILIAS_DOWNLOADER_CLIENT_ID']}'" \
+                               f" --{options[index]}-client-secret '{config['ILIAS_DOWNLOADER_CLIENT_SECRET']}'"
+                else:
+                    logging.warning('The drive client id and the client secret have not been set. Using defaults...')
+            else:
+                command = "rclone config"
+
+            # run the setup command
+            subprocess.run(command, shell=True)
+        else:
+            quit()
+    else:
+        # setup is complete
+        return True
+
+
+def upload_rclone(output_path_local='output', output_path_remote='output'):
+    r_name = config['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME']
+
+    command = f"rclone copy -v " \
+              f"'{output_path_local}' '{r_name}:{output_path_remote}'"
+
+    # execute the upload command
+    subprocess.run(command, shell=True)
+
+    logging.info('Cloud upload completed.')
 
 
 if __name__ == '__main__':
@@ -71,21 +127,29 @@ if __name__ == '__main__':
     # load the config
     config = load_config()
 
-    # set up the cloud uploader
-    db = CloudUploader(logger=logging)
-
     # check if username and passwords are available
     if not config['ILIAS_DOWNLOADER_USER_NAME']:
         logging.error('The Ilias username has not been set')
     elif not config['ILIAS_DOWNLOADER_PASSWORD']:
         logging.error('The Ilias password has not been set')
     else:
-        # # schedule automatic downloads
-        # ts = TimeScheduler()
-        # ts.add(Task('17:32:20', download_ilias_data))
-        # ts.start()
+        set_up_complete = False
 
-        db.upload_new_files('./ilias')
+        # set up a cloud provider
+        while not set_up_complete:
+            set_up_complete = setup_rclone()
+
+        if not os.path.exists('output'):
+            # this is the initial run, directly start the download and upload to the cloud
+            download_ilias_data()
+
+        # schedule automatic downloads and uploads
+        upload_times = config['ILIAS_DOWNLOADER_UPLOAD_TIMES'].split()
+        logging.info(f'Scheduling automatic downloads for {upload_times}')
+        ts = TimeScheduler()
+        for t in upload_times:
+            ts.add(Task(t, download_ilias_data))
+        ts.start()
 
         # wait until manually stopped
         Event().wait()
