@@ -5,8 +5,8 @@ from threading import Event
 from typing import Dict
 
 from dotenv import load_dotenv
-from simple_term_menu import TerminalMenu
 
+from ConsoleInput import show_selection_dialog
 from scheduler import TimeScheduler, Task
 
 
@@ -40,7 +40,7 @@ def load_config() -> Dict:
 
 def download_ilias_data():
     # create the ilias downloader command
-    command = f"~/.cargo/bin/KIT-ILIAS-downloader" \
+    command = f"KIT-ILIAS-downloader" \
               f" -U {config['ILIAS_DOWNLOADER_USER_NAME']}" \
               f" -P \"{config['ILIAS_DOWNLOADER_PASSWORD']}\"" \
               f" -o \"output\"" \
@@ -68,23 +68,25 @@ def setup_rclone():
     if f"{r_name}:" not in remotes:
         # setup is not yet complete
         options = ["Yes (start interactive setup)", "No (terminate)"]
-        terminal_menu = TerminalMenu(options, title=f'The remote \'{r_name}\' has not been set up yet. Set it up now?')
-        index = terminal_menu.show()
+        i = show_selection_dialog(options, ['y', 'n'],
+                                  f'The remote \'{r_name}\' has not been set up yet. Set it up now?')
 
-        if index == 0:
-            options_display = ['GoogleDrive', 'Dropbox', 'OneDrive', "Other (manual setup rclone)"]
+        if i == 'y':
+            options_display = ['GoogleDrive', 'Dropbox', 'OneDrive', "Other (manual setup using rclone)"]
             options = ["drive", 'dropbox', 'onedrive', None]
-            terminal_menu = TerminalMenu(options_display, title=f'Choose a cloud provider.')
-            index = terminal_menu.show()
+
+            index = show_selection_dialog(options_display, title='Choose your cloud provider')
             if index < len(options) - 1:
-                # setup google drive
+                # set up the selected cloud
                 command = f"rclone config create '{r_name}' {options[index]}"
 
                 if config['ILIAS_DOWNLOADER_CLIENT_ID'] and config['ILIAS_DOWNLOADER_CLIENT_SECRET']:
+                    logging.info('Using the provided client id and client secret.')
+
                     command += f" --{options[index]}-client-id '{config['ILIAS_DOWNLOADER_CLIENT_ID']}'" \
                                f" --{options[index]}-client-secret '{config['ILIAS_DOWNLOADER_CLIENT_SECRET']}'"
                 else:
-                    logging.warning('The drive client id and the client secret have not been set. Using defaults...')
+                    logging.warning('The drive client id and the client secret have not been set. Using defaults.')
             else:
                 command = "rclone config"
 
@@ -150,8 +152,6 @@ if __name__ == '__main__':
         for t in upload_times:
             ts.add(Task(t, download_ilias_data))
         ts.start()
-
-        upload_rclone("output", config['ILIAS_DOWNLOADER_OUTPUT_PATH'])
 
         # wait until manually stopped
         Event().wait()

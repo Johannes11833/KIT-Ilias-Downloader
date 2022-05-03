@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  app:
+    image: test
+    stdin_open: true
+    tty: true
+    command: python3 main.py
