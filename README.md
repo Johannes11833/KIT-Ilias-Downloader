@@ -1,12 +1,15 @@
 # Auto KIT-Ilias Downloader
 
-This program allows you to automatically upload new files from the KIT ilias page to a cloud storage.
+The "Auto KIT-Ilias Downloader" allows you to automatically upload new files from the KIT ilias page to a cloud storage.
+This way you will no longer have to manually download new files from ilias.
+
 Lots of cloud storage services are supported, including:
 
 - Google Drive
 - One Drive
 - Dropbox
-  The whole list of supported clouds can be found here: https://rclone.org/
+
+The whole list of supported clouds can be found here: https://rclone.org/
 
 ## Installation
 
