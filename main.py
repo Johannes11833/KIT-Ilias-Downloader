@@ -60,6 +60,12 @@ def download_ilias_data():
 
 
 def setup_rclone():
+    # check if rclone is installed
+    from shutil import which
+    if which('rclone') is None:
+        raise Exception('Rclone is not installed on this system. It is need to backup the files to the cloud!'
+                        'Install it here: https://rclone.org/')
+
     r_name = config['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME']
 
     # get the available remotes
