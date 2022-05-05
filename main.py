@@ -6,7 +6,7 @@ from typing import Dict
 
 from dotenv import load_dotenv
 
-from ConsoleInput import show_selection_dialog
+from console_input import show_selection_dialog
 from scheduler import TimeScheduler, Task
 
 

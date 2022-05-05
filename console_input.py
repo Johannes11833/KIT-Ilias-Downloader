@@ -1,7 +1,6 @@
 from typing import Any
 
 
-
 def show_selection_dialog(options_display, options_short=None, title=None):
     if options_short is None:
         options_short = [i for i in range(0, len(options_display))]
