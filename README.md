@@ -1,6 +1,6 @@
 # Auto KIT-Ilias Downloader
 
-This program allows you to automaticallly uplaod new files from the KIT ilias page to a cloud storage.
+This program allows you to automatically upload new files from the KIT ilias page to a cloud storage.
 Lots of cloud storage services are supported, including:
 
 - Google Drive
@@ -23,11 +23,11 @@ To run this program, you will need to add the following environment variables to
 
 ### Optional variables
 
-Furthermore, the following optional variables can be used to customize the bevior of the auto uploader:
+Furthermore, the following optional variables can be used to customize the behavior of the auto uploader:
 
 - `ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH` : The path on the cloud to sync to.
 
-- `ILIAS_DOWNLOADER_SYNC_URL` : The page on ilias that should be synced. By default all favourites are synced.
+- `ILIAS_DOWNLOADER_SYNC_URL` : The page on ilias that should be synced. By default, all favourites are synced.
 
 - `ILIAS_DOWNLOADER_JOBS` : The amount of parallel jobs.
 
