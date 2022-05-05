@@ -1,6 +1,5 @@
 from typing import Any
 
-from simple_term_menu import TerminalMenu
 
 
 def show_selection_dialog(options_display, options_short=None, title=None):
@@ -8,6 +7,7 @@ def show_selection_dialog(options_display, options_short=None, title=None):
         options_short = [i for i in range(0, len(options_display))]
 
     try:
+        from simple_term_menu import TerminalMenu
         terminal_menu = TerminalMenu(options_display, title=title)
         index = terminal_menu.show()
         return options_short[index]

@@ -25,7 +25,7 @@ def load_config() -> Dict:
         ['ILIAS_DOWNLOADER_JOBS', 10],
         ['ILIAS_DOWNLOADER_RATE', 100],
         ['ILIAS_DOWNLOADER_USE_KEY_RING', False],
-        ['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME', 'cloud-drive'],
+        ['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME', 'IliasDL-Cloud-Drive'],
         ['ILIAS_DOWNLOADER_CLIENT_ID', None],
         ['ILIAS_DOWNLOADER_CLIENT_SECRET', None],
         ['ILIAS_DOWNLOADER_UPLOAD_TIMES', '00:00'],
@@ -78,13 +78,13 @@ def setup_rclone():
             index = show_selection_dialog(options_display, title='Choose your cloud provider')
             if index < len(options) - 1:
                 # set up the selected cloud
-                command = f"rclone config create '{r_name}' {options[index]}"
+                command = f"rclone config create \"{r_name}\" {options[index]}"
 
                 if config['ILIAS_DOWNLOADER_CLIENT_ID'] and config['ILIAS_DOWNLOADER_CLIENT_SECRET']:
                     logging.info('Using the provided client id and client secret.')
 
-                    command += f" --{options[index]}-client-id '{config['ILIAS_DOWNLOADER_CLIENT_ID']}'" \
-                               f" --{options[index]}-client-secret '{config['ILIAS_DOWNLOADER_CLIENT_SECRET']}'"
+                    command += f" --{options[index]}-client-id \"{config['ILIAS_DOWNLOADER_CLIENT_ID']}\"" \
+                               f" --{options[index]}-client-secret \"{config['ILIAS_DOWNLOADER_CLIENT_SECRET']}\""
                 else:
                     logging.warning('The drive client id and the client secret have not been set. Using defaults.')
             else:
@@ -103,7 +103,7 @@ def upload_rclone(output_path_local='output', output_path_remote='output'):
     r_name = config['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME']
 
     command = f"rclone copy --progress --ignore-existing " \
-              f"'{output_path_local}' '{r_name}:{output_path_remote}'"
+              f"\"{output_path_local}\" \"{r_name}:{output_path_remote}\""
 
     # execute the upload command
     subprocess.run(command, shell=True)
