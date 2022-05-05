@@ -20,11 +20,10 @@ def load_config() -> Dict:
     key_defaults = [
         ['ILIAS_DOWNLOADER_USER_NAME', None],
         ['ILIAS_DOWNLOADER_PASSWORD', None],
-        ['ILIAS_DOWNLOADER_OUTPUT_PATH', 'output'],
+        ['ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH', 'output'],
         ['ILIAS_DOWNLOADER_SYNC_URL', None],
         ['ILIAS_DOWNLOADER_JOBS', 10],
         ['ILIAS_DOWNLOADER_RATE', 100],
-        ['ILIAS_DOWNLOADER_USE_KEY_RING', False],
         ['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME', 'IliasDL-Cloud-Drive'],
         ['ILIAS_DOWNLOADER_CLIENT_ID', None],
         ['ILIAS_DOWNLOADER_CLIENT_SECRET', None],
