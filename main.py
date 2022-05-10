@@ -41,7 +41,7 @@ def download_ilias_data():
     logging.info("Starting ilias download...")
 
     # create the ilias downloader command
-    command = f"KIT-ILIAS-downloader" \
+    command = f"./KIT-ILIAS-downloader" \
               f" -U {config['ILIAS_DOWNLOADER_USER_NAME']}" \
               f" -P \"{config['ILIAS_DOWNLOADER_PASSWORD']}\"" \
               f" -o \"output\"" \
@@ -52,12 +52,16 @@ def download_ilias_data():
         command += f" --sync-url \"{config['ILIAS_DOWNLOADER_SYNC_URL']}\""
 
     # execute the command
-    subprocess.run(command, shell=True)
+    output = subprocess.run(command, shell=True)
 
-    logging.info('Download from ilias completed. Starting upload to the cloud...')
+    if output.returncode == 0:
+        logging.info('Download from ilias completed. Starting upload to the cloud...')
 
-    # upload the new file
-    upload_rclone("output", config['ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH'])
+        # upload the new file
+        upload_rclone("output", config['ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH'])
+    else:
+        raise Exception('Could not execute the ilias download command. '
+                        'If on linux/mac run: \n\tchmod +x KIT-ILIAS-downloader\nto make the downloader executable.')
 
 
 def setup_rclone():
