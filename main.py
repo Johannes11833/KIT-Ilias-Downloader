@@ -38,6 +38,8 @@ def load_config() -> Dict:
 
 
 def download_ilias_data():
+    logging.info("Starting ilias download...")
+
     # create the ilias downloader command
     command = f"KIT-ILIAS-downloader" \
               f" -U {config['ILIAS_DOWNLOADER_USER_NAME']}" \
@@ -55,7 +57,7 @@ def download_ilias_data():
     logging.info('Download from ilias completed. Starting upload to the cloud...')
 
     # upload the new file
-    upload_rclone("output", config['ILIAS_DOWNLOADER_OUTPUT_PATH'])
+    upload_rclone("output", config['ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH'])
 
 
 def setup_rclone():
