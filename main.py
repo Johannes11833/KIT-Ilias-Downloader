@@ -216,7 +216,5 @@ if __name__ == '__main__':
             ts.add(Task(t, download_ilias_data))
         ts.start()
 
-        download_ilias_data()
-
         # wait until manually stopped
         Event().wait()
