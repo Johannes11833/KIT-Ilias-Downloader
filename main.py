@@ -1,6 +1,8 @@
+import json
 import logging
 import os
 import subprocess
+from datetime import datetime
 from threading import Event
 from typing import Dict
 
@@ -8,6 +10,8 @@ from dotenv import load_dotenv
 
 from scheduler import TimeScheduler, Task
 from setup_cli import unix_like, setup_ilias_downloader, setup_rclone
+
+F_NAME_REPORT = 'data/ilias_upload_report.json'
 
 
 def load_config() -> Dict:
@@ -61,6 +65,18 @@ def download_ilias_data():
     if output.returncode == 0:
         logging.info('Download from ilias completed. Starting upload to the cloud...')
 
+        # create/update report
+        if os.path.isfile(F_NAME_REPORT):
+            with open(F_NAME_REPORT) as json_file:
+                data = json.load(json_file)
+        else:
+            data = {'upload_events': []}
+
+        data['upload_events'].insert(0, datetime.now().strftime("%d/%m/%Y, %H:%M:%S"))
+
+        with open(F_NAME_REPORT, 'w') as fp:
+            json.dump(data, fp, indent="\t")
+
         # upload the new file
         upload_rclone("output", config['ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH'])
     else:
@@ -75,6 +91,10 @@ def upload_rclone(output_path_local='output', output_path_remote='output'):
 
     # execute the upload command
     output = subprocess.run(command, shell=True, stderr=subprocess.PIPE)
+
+    # upload the updated report
+    command = f"rclone copy {F_NAME_REPORT} \"{r_name}:{output_path_remote}\""
+    subprocess.run(command, shell=True)
 
     if output.returncode == 0:
         logging.info('Cloud upload completed.')
@@ -100,8 +120,6 @@ if __name__ == '__main__':
     # load the config
     config = load_config()
 
-    download_ilias_data()
-
     # check if username and passwords are available
     if not config['ILIAS_DOWNLOADER_USER_NAME']:
         logging.error('The Ilias username has not been set')
@@ -110,7 +128,7 @@ if __name__ == '__main__':
     else:
 
         # set up the ilias downloader
-        setup_ilias_downloader(config, logging)
+        setup_ilias_downloader(logging)
 
         # set up a cloud provider
         set_up_complete = False

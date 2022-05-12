@@ -12,7 +12,7 @@ def unix_like() -> bool:
         return True
 
 
-def setup_ilias_downloader(config, logging):
+def setup_ilias_downloader(logging):
     from shutil import which
     if unix_like() and which(f'{Path.home()}/.cargo/bin/KIT-ILIAS-downloader') is None:
         options = ['yes', 'no']
@@ -32,7 +32,7 @@ def setup_ilias_downloader(config, logging):
                     raise Exception('Failed to auto install rust. '
                                     'Please try installing it manually at: https://www.rust-lang.org/tools/install')
 
-            # install the ilias downlaoder cli tool
+            # install the ilias downloader cli tool
             output = subprocess.run("cargo install --all-features "
                                     "--git 'https://github.com/FliegendeWurst/KIT-ILIAS-downloader' --branch stable",
                                     shell=True)
