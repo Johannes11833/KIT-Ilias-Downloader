@@ -3,11 +3,13 @@ import logging
 import os
 import subprocess
 from datetime import datetime
+from pathlib import Path
 from threading import Event
-from typing import Dict
+from typing import Dict, List
 
 from dotenv import load_dotenv
 
+from files import load_json_dict, save_json_dict, get_local_file_list
 from scheduler import TimeScheduler, Task
 from setup_cli import unix_like, setup_ilias_downloader, setup_rclone
 
@@ -63,19 +65,9 @@ def download_ilias_data():
     output = subprocess.run(command, shell=True)
 
     if output.returncode == 0:
-        logging.info('Download from ilias completed. Starting upload to the cloud...')
-
-        # create/update report
-        if os.path.isfile(F_NAME_REPORT):
-            with open(F_NAME_REPORT) as json_file:
-                data = json.load(json_file)
-        else:
-            data = {'upload_events': []}
-
-        data['upload_events'].insert(0, datetime.now().strftime("%d/%m/%Y, %H:%M:%S"))
-
-        with open(F_NAME_REPORT, 'w') as fp:
-            json.dump(data, fp, indent="\t")
+        # update report
+        new_files_count = update_report_dict()
+        logging.info(f'Downloaded {new_files_count} new file(s) from ilias. Starting upload to the cloud...')
 
         # upload the new file
         upload_rclone("output", config['ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH'])
@@ -100,6 +92,26 @@ def upload_rclone(output_path_local='output', output_path_remote='output'):
         logging.info('Cloud upload completed.')
     else:
         logging.error(f'Cloud upload failed with error message: {output.stderr}', )
+
+
+def update_report_dict() -> int:
+    sync_dict = load_json_dict(F_NAME_REPORT, {'upload_events': [], 'synced_files': []})
+    local_files = get_local_file_list(Path('./output'))
+    uploaded_files = sync_dict.get('synced_files')
+    upload_events = sync_dict.get('upload_events')
+    new_files = list(set(local_files).difference(uploaded_files))
+
+    # update synced files
+    sync_dict['synced_files'].extend([path.__str__() for path in new_files])
+
+    # add new event
+    upload_events.insert(0, {'time': datetime.now().strftime("%d/%m/%Y, %H:%M:%S"), 'new_files_count': len(new_files),
+                             'new_files': new_files})
+
+    # save the update report
+    save_json_dict(F_NAME_REPORT, sync_dict)
+
+    return len(new_files)
 
 
 if __name__ == '__main__':
