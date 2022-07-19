@@ -1,19 +1,19 @@
-import json
 import logging
 import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
 from threading import Event
-from typing import Dict, List
+from typing import Dict
 
 from dotenv import load_dotenv
 
 from files import load_json_dict, save_json_dict, get_local_file_list
 from scheduler import TimeScheduler, Task
-from setup_cli import unix_like, setup_ilias_downloader, setup_rclone
+from setup_cli import setup_ilias_downloader, setup_rclone
 
 F_NAME_REPORT = 'data/ilias_upload_report.json'
+EXECUTABLES_FOLDER_PATH = Path('data/kit-downloader')
 
 
 def load_config() -> Dict:
@@ -47,10 +47,7 @@ def download_ilias_data():
     logging.info("Starting ilias download...")
 
     # create the ilias downloader command
-    if unix_like():
-        command = f"~/.cargo/bin/KIT-ILIAS-downloader"
-    else:
-        command = f"KIT-ILIAS-downloader"
+    command = str(Path(EXECUTABLES_FOLDER_PATH, 'KIT-ILIAS-downloader'))
 
     command += f" -U {config['ILIAS_DOWNLOADER_USER_NAME']}" \
                f" -P \"{config['ILIAS_DOWNLOADER_PASSWORD']}\"" \
@@ -140,7 +137,7 @@ if __name__ == '__main__':
     else:
 
         # set up the ilias downloader
-        setup_ilias_downloader(logging)
+        setup_ilias_downloader(logging, exec_path=EXECUTABLES_FOLDER_PATH)
 
         # set up a cloud provider
         set_up_complete = False

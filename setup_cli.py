@@ -1,6 +1,8 @@
 from pathlib import Path
 import subprocess
 
+import requests
+
 from console_input import show_selection_dialog
 
 
@@ -12,40 +14,28 @@ def unix_like() -> bool:
         return True
 
 
-def setup_ilias_downloader(logging):
-    from shutil import which
-    if unix_like() and which(f'{Path.home()}/.cargo/bin/KIT-ILIAS-downloader') is None:
-        options = ['yes', 'no']
-        i = show_selection_dialog(options, ['y', 'n'],
-                                  f'The KIT-ILIAS-downloader is not installed on this system. Auto install it?')
+def setup_ilias_downloader(logging, exec_path: Path):
+    if not exec_path.is_dir():
+        exec_path.mkdir()
+    elif (unix_like() and Path(exec_path, 'KIT-ILIAS-downloader').is_file()) \
+            or (not unix_like() and Path(exec_path, 'KIT-ILIAS-downloader.exe').is_file()):
+        print(f'KIT-ILIAS-downloader executable found (Unix = {unix_like()}).')
+        return
 
-        if i == 'y':
-            if which('cargo') is None:
-                # install rust first
+    # get the newest release of the KIT-ILIAS-downloader through the GitHub api.
+    r = requests.get('https://api.github.com/repos/FliegendeWurst/KIT-ILIAS-downloader/releases/latest')
+    data = r.json()
 
-                logging.info('Rust is not installed. Trying to auto install it...')
-                output = subprocess.run("curl https://sh.rustup.rs -sSf | sh -s -- -y", shell=True)
+    # download all assets of the latest release
+    if r.status_code == requests.codes.ok:
+        for asset in data['assets']:
+            with open(Path(exec_path, asset['name']), "wb") as f:
+                f.write(requests.get(asset['browser_download_url']).content)
 
-                if output.returncode == 0:
-                    logging.info('Rust was successfully installed.')
-                else:
-                    raise Exception('Failed to auto install rust. '
-                                    'Please try installing it manually at: https://www.rust-lang.org/tools/install')
-
-            # install the ilias downloader cli tool
-            output = subprocess.run("cargo install --all-features "
-                                    "--git 'https://github.com/FliegendeWurst/KIT-ILIAS-downloader' --branch stable",
-                                    shell=True)
-
-            if output.returncode == 0:
-                logging.info('The KIT-ILIAS-downloader CLI tool was successfully installed.')
-            else:
-                raise Exception('Failed to install the KIT-ILIAS-downloader CLI tool.'
-                                'Please try manually installing it at: '
-                                'https://github.com/fliegendewurst/kit-ilias-downloader')
-
-        else:
-            quit()
+        logging.info(f'Successfully downloaded KIT-ILIAS-downloader {data["name"]}')
+    else:
+        logging.warning('Could not retrieve latest  KIT-ILIAS-downloader release from GitHub!')
+        logging.warning(f'Code {r.status_code}: {r.content}')
 
 
 def setup_rclone(config, logging):
