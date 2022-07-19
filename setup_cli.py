@@ -1,5 +1,5 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 import requests
 
@@ -31,6 +31,10 @@ def setup_ilias_downloader(logging, exec_path: Path):
         for asset in data['assets']:
             with open(Path(exec_path, asset['name']), "wb") as f:
                 f.write(requests.get(asset['browser_download_url']).content)
+
+        if unix_like():
+            # if on unix: make the binary file executable
+            subprocess.run(f'chmod +x {Path(exec_path, "KIT-ILIAS-downloader")}', shell=True)
 
         logging.info(f'Successfully downloaded KIT-ILIAS-downloader {data["name"]}')
     else:
