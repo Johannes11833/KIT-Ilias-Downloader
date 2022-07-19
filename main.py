@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import logging
 import os
 import subprocess
@@ -6,6 +7,8 @@ from pathlib import Path
 from threading import Event
 from typing import Dict
 
+import argh
+from argh import arg
 from dotenv import load_dotenv
 
 from files import load_json_dict, save_json_dict, get_local_file_list
@@ -14,6 +17,7 @@ from setup_cli import setup_ilias_downloader, setup_rclone
 
 F_NAME_REPORT = 'data/ilias_upload_report.json'
 EXECUTABLES_FOLDER_PATH = Path('data/kit-downloader')
+config = {}
 
 
 def load_config() -> Dict:
@@ -111,7 +115,8 @@ def update_report_dict() -> int:
     return len(new_files)
 
 
-if __name__ == '__main__':
+@arg('--force_update', '-f', help='force the update immediately')
+def main(force_update: bool = False):
     # create data folder
     if not os.path.exists('./data'):
         os.makedirs('./data')
@@ -127,6 +132,7 @@ if __name__ == '__main__':
     )
 
     # load the config
+    global config
     config = load_config()
 
     # check if username and passwords are available
@@ -144,7 +150,7 @@ if __name__ == '__main__':
         while not set_up_complete:
             set_up_complete = setup_rclone(config, logging)
 
-        if not os.path.exists('output'):
+        if not os.path.exists('output') or force_update:
             # this is the initial run, directly start the download and upload to the cloud
             download_ilias_data()
 
@@ -158,3 +164,7 @@ if __name__ == '__main__':
 
         # wait until manually stopped
         Event().wait()
+
+
+if __name__ == '__main__':
+    argh.dispatch_command(main)
