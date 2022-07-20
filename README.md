@@ -16,6 +16,15 @@ The whole list of supported clouds can be found here: https://rclone.org/
 To run this program, you need to install rclone:
 https://rclone.org/downloads/
 
+### Raspberry Pi Deployment
+To run this app on a raspberry pi, you'll first have to [compile the KIT-ILIAS-downloader from source](https://github.com/FliegendeWurst/KIT-ILIAS-downloader#installation):
+
+```
+$ cargo install --all-features --git 'https://github.com/FliegendeWurst/KIT-ILIAS-downloader'
+```
+Afterwards place the compiled binary file in the `data/kit-downloader` folder.
+
+
 ## Environment Variables
 
 To run this program, you will need to add the following environment variables to your .env file
