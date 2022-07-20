@@ -17,13 +17,12 @@ To run this program, you need to install rclone:
 https://rclone.org/downloads/
 
 ### Raspberry Pi Deployment
-To run this app on a raspberry pi, you'll first have to [compile the KIT-ILIAS-downloader from source](https://github.com/FliegendeWurst/KIT-ILIAS-downloader#installation):
+To run this app on a raspberry pi, you'll first have to [compile the KIT-ILIAS-downloader from source](https://github.com/FliegendeWurst/KIT-ILIAS-downloader#installation). Inside the root of this repo, run the following two commands:
 
 ```
-$ cargo install --all-features --git 'https://github.com/FliegendeWurst/KIT-ILIAS-downloader'
+cargo install --all-features --git 'https://github.com/FliegendeWurst/KIT-ILIAS-downloader';
+cp ~/.cargo/bin/KIT-ILIAS-downloader data/kit-downloader;
 ```
-Afterwards place the compiled binary file in the `data/kit-downloader` folder.
-
 
 ## Environment Variables
 
