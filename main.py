@@ -2,21 +2,22 @@
 import logging
 import os
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from threading import Event
 from typing import Dict
-
 import argh
 from argh import arg
 from dotenv import load_dotenv
+import os
+import time
 
 from files import load_json_dict, save_json_dict, get_local_file_list
-from scheduler import TimeScheduler, Task
+from scheduler import TimeScheduler, DailyTask, SingularTask
 from setup_cli import setup_ilias_downloader, setup_rclone
 
-F_NAME_REPORT = 'data/ilias_upload_report.json'
-EXECUTABLES_FOLDER_PATH = Path('data/kit-downloader')
+F_NAME_REPORT = "data/ilias_upload_report.json"
+EXECUTABLES_FOLDER_PATH = Path("data/kit-downloader")
 config = {}
 
 
@@ -38,6 +39,7 @@ def load_config() -> Dict:
         ['ILIAS_DOWNLOADER_CLIENT_ID', None],
         ['ILIAS_DOWNLOADER_CLIENT_SECRET', None],
         ['ILIAS_DOWNLOADER_UPLOAD_TIMES', '00:00'],
+        ['WEBCAL_URL', None],
     ]
 
     # load the environment variables
@@ -63,17 +65,20 @@ def download_ilias_data():
         command += f" --sync-url \"{config['ILIAS_DOWNLOADER_SYNC_URL']}\""
 
     # execute the command
-    output = subprocess.run(command, shell=True)
+    proc = subprocess.Popen(command, shell=True)
 
-    if output.returncode == 0:
+    while proc.poll() is None:
+        time.sleep(1)
+
+    if proc.returncode == 0:
         # update report
         new_files_count = update_report_dict()
         logging.info(f'Downloaded {new_files_count} new file(s) from ilias. Starting upload to the cloud...')
 
         # upload the new file
-        upload_rclone("output", config['ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH'])
+        upload_rclone("output", config["ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH"])
     else:
-        logging.error(f'Download from Ilias failed.')
+        logging.error("Download from Ilias failed.")
 
 
 def upload_rclone(output_path_local='output', output_path_remote='output'):
@@ -138,32 +143,52 @@ def main(force_update: bool = False):
     # check if username and passwords are available
     if not config['ILIAS_DOWNLOADER_USER_NAME']:
         logging.error('The Ilias username has not been set')
+        return
     elif not config['ILIAS_DOWNLOADER_PASSWORD']:
         logging.error('The Ilias password has not been set')
-    else:
+        return
 
         # set up the ilias downloader
-        setup_ilias_downloader(logging, exec_path=EXECUTABLES_FOLDER_PATH)
+    setup_ilias_downloader(logging, exec_path=EXECUTABLES_FOLDER_PATH)
 
-        # set up a cloud provider
-        set_up_complete = False
-        while not set_up_complete:
-            set_up_complete = setup_rclone(config, logging)
+    # set up a cloud provider
+    set_up_complete = False
+    while not set_up_complete:
+        set_up_complete = setup_rclone(config, logging)
 
-        if not os.path.exists('output') or force_update:
-            # this is the initial run, directly start the download and upload to the cloud
-            download_ilias_data()
+    if not os.path.exists("output") or force_update:
+        # this is the initial run, directly start the download and upload to the cloud
+        download_ilias_data()
 
-        # schedule automatic downloads and uploads
-        upload_times = config['ILIAS_DOWNLOADER_UPLOAD_TIMES'].split()
-        logging.info(f'Scheduling automatic downloads for {upload_times}')
-        ts = TimeScheduler()
+    # schedule automatic downloads and uploads
+    ts = TimeScheduler()
+    if config["ILIAS_DOWNLOADER_UPLOAD_TIMES"] is not None:
+        upload_times = config["ILIAS_DOWNLOADER_UPLOAD_TIMES"].split()
+        logging.info(f"Scheduling automatic downloads for {upload_times}")
+        
         for t in upload_times:
-            ts.add(Task(t, download_ilias_data))
-        ts.start()
+            ts.add(DailyTask(t, download_ilias_data))
 
-        # wait until manually stopped
-        Event().wait()
+    if config["WEBCAL_URL"] is not None:
+        from icalevnt.icalevents import events
+
+        es = events(
+            config["WEBCAL_URL"],
+            start=datetime.now(),
+            end=datetime.now() + timedelta(days=365),
+        )
+        for event in es:
+            logging.info(
+                f"Scheduling iCal event @ {event.start - timedelta(minutes=5)}"
+            )
+            ts.add(
+                SingularTask(event.start - timedelta(minutes=5), download_ilias_data)
+            )
+
+    ts.start()
+
+    # wait until manually stopped
+    Event().wait()
 
 
 if __name__ == '__main__':
