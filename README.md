@@ -45,6 +45,8 @@ Furthermore, the following optional variables can be used to customize the behav
 - `ILIAS_DOWNLOADER_UPLOAD_TIMES` : The time of the day at which we want to upload. You can also specify multiple times
   for example : `00:00 09:00` for automatic syncs at 0 and 9 o'clock.
 
+- `WEBCAL_URL` : A URL to a web calender. Will schedule an upload 5 minutes ahead of each event
+
 ## Acknowledgements
 
 - [KIT-ILIAS-downloader](https://github.com/FliegendeWurst/KIT-ILIAS-downloader): Does all the heavy lifting to download
