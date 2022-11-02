@@ -38,7 +38,7 @@ def load_config() -> Dict:
         ['ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME', 'IliasDL-Cloud-Drive'],
         ['ILIAS_DOWNLOADER_CLIENT_ID', None],
         ['ILIAS_DOWNLOADER_CLIENT_SECRET', None],
-        ['ILIAS_DOWNLOADER_UPLOAD_TIMES', '00:00'],
+        ['ILIAS_DOWNLOADER_UPLOAD_TIMES', None],
         ['WEBCAL_URL', None],
     ]
 
