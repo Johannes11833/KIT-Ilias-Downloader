@@ -65,10 +65,7 @@ def download_ilias_data():
         command += f" --sync-url \"{config['ILIAS_DOWNLOADER_SYNC_URL']}\""
 
     # execute the command
-    proc = subprocess.Popen(command, shell=True)
-
-    while proc.poll() is None:
-        time.sleep(1)
+    proc = subprocess.run(command, shell=True)
 
     if proc.returncode == 0:
         # update report
