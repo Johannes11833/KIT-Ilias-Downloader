@@ -164,7 +164,7 @@ def main(force_update: bool = False):
     ts = TimeScheduler()
     if config["ILIAS_DOWNLOADER_UPLOAD_TIMES"] is not None:
         upload_times = config["ILIAS_DOWNLOADER_UPLOAD_TIMES"].split()
-        logging.info(f"Scheduling automatic downloads for {upload_times}")
+        logging.info(f"Scheduling daily event(s) @ {upload_times}")
         
         for t in upload_times:
             ts.add(DailyTask(t, download_ilias_data))
