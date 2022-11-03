@@ -16,39 +16,50 @@ class Task(ABC):
         super().__init__()
         self.function = function
         self.args = args if args is not None else {}
-    
+
     @abstractmethod
     def create_trigger() -> CronTrigger:
         return NotImplemented
-        
+
+
 class DailyTask(Task):
     target_time: str
-    def __init__(self, target_time : str, function: Callable, args: Dict | None = None) -> None:
+
+    def __init__(
+        self, target_time: str, function: Callable, args: Dict | None = None
+    ) -> None:
         self.target_time = target_time
         super().__init__(function, args)
-    
+
     def create_trigger(self) -> None:
         t = datetime.time.fromisoformat(self.target_time)
         CronTrigger(hour=t.hour, minute=t.minute, second=t.second)
-        
+
 
 class SingularTask(Task):
-    target_time : datetime.datetime
-    def __init__(self, target_time: datetime.datetime, function: Callable, args: Dict | None = None) -> None:
+    target_time: datetime.datetime
+
+    def __init__(
+        self,
+        target_time: datetime.datetime,
+        function: Callable,
+        args: Dict | None = None,
+    ) -> None:
         self.target_time = target_time.astimezone(tz.tzlocal())
         super().__init__(function, args)
 
     def create_trigger(self) -> CronTrigger:
-        return CronTrigger(year=self.target_time.year,
-                           month=self.target_time.month,
-                           day=self.target_time.day,
-                           hour=self.target_time.hour,
-                           minute=self.target_time.minute,
-                           second=self.target_time.second)
+        return CronTrigger(
+            year=self.target_time.year,
+            month=self.target_time.month,
+            day=self.target_time.day,
+            hour=self.target_time.hour,
+            minute=self.target_time.minute,
+            second=self.target_time.second,
+        )
 
 
 class TimeScheduler:
-
     def __init__(self):
         self.task_list = []
 

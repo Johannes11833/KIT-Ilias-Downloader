@@ -15,7 +15,7 @@ def load_json_dict(file_name: Union[str, Path], default=None) -> Dict:
 
 
 def save_json_dict(path: Union[str, Path], data):
-    with open(path, 'w') as fp:
+    with open(path, "w") as fp:
         json.dump(data, fp, indent="\t")
 
 
