@@ -2,6 +2,7 @@ import atexit
 import datetime
 from typing import Dict, Callable
 from abc import ABC, abstractmethod
+from dateutil import tz
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -34,7 +35,7 @@ class DailyTask(Task):
 class SingularTask(Task):
     target_time : datetime.datetime
     def __init__(self, target_time: datetime.datetime, function: Callable, args: Dict | None = None) -> None:
-        self.target_time = target_time
+        self.target_time = target_time.astimezone(tz.tzlocal())
         super().__init__(function, args)
 
     def create_trigger(self) -> CronTrigger:
