@@ -44,7 +44,7 @@ docker compose up
 ### Local Setup
 
 The local set up is similar to the Docker one in the way, that you'll first have to set up the rclone remote of your
-choice. Once that is done, start the python application by runnin
+choice. Once that is done, start the python application by running:
 
 ```shell
 python main.py
