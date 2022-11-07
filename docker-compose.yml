@@ -6,7 +6,7 @@ services:
     image: therealjohannes/kit-ilias-downloader
     volumes:
       # the default location of the rclone config (check with `rclone config file`)
-      - $HOME/.config/rclone/rclone.conf:/root/.config/rclone/rclone.conf
+      - $HOME/.config/rclone:/root/.config/rclone
 
 ## -- optional --
 
