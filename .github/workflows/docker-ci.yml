@@ -6,7 +6,7 @@ on:
       - '*'
 jobs:
   build:
-    name: Build Web App
+    name: Build Docker
     runs-on: ubuntu-latest
 
     steps:
