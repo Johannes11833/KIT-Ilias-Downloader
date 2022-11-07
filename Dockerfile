@@ -1,5 +1,5 @@
 # set base image (host OS)
-FROM python:3.8
+FROM python:3.11
 
 # install curl
 RUN apt-get update && apt install rclone -y
