@@ -11,16 +11,63 @@ Lots of cloud storage services are supported, including:
 
 The whole list of supported clouds can be found here: https://rclone.org/
 
-## Installation
+## Setup
 
 To run this program, you need to install rclone:
 https://rclone.org/downloads/
 
-### Raspberry Pi Deployment
-To run this app on a raspberry pi, you'll first have to [compile the KIT-ILIAS-downloader from source](https://github.com/FliegendeWurst/KIT-ILIAS-downloader#installation). Inside the root of this repo, run the following two commands:
+### Docker Setup
 
+The easiest way to run this program is through docker. Do to so, you'll first have to manually set up a rclone remote
+(cloud) outside of docker. Run
+
+```shell
+rclone config
 ```
+
+and select "New remote" and follow the instructions there.
+Once the setup is complete, verify that the rclone host path in docker-compose matches the one of rclone by running
+
+```shell
+rclone config file
+```
+
+(only add the path up until the rclone folder).
+
+The docker-compose file mounts the rclone config folder to make it accessible to the rclone software inside the docker
+container. Finally, start the container with the following command.
+
+```shell
+docker compose up
+```
+
+### Local Setup
+
+The local set up is similar to the Docker one in the way, that you'll first have to set up the rclone remote of your
+choice. Once that is done, start the python application by runnin
+
+```shell
+python main.py
+```
+
+## Raspberry Pi Deployment
+
+To run this app on a raspberry pi, you'll first have
+to [compile the KIT-ILIAS-downloader from source](https://github.com/FliegendeWurst/KIT-ILIAS-downloader#installation).
+
+```shell
 cargo install --all-features --git 'https://github.com/FliegendeWurst/KIT-ILIAS-downloader';
+```
+
+### Docker Setup
+
+Uncomment Option (2) in docker-compose.yml to mount the Ilias-DL executable.
+
+### Local Setup
+
+Inside the root of this repo, run the following command to copy the Ilias-DL executable to the project data folder:
+
+```shell
 cp ~/.cargo/bin/KIT-ILIAS-downloader data/kit-downloader;
 ```
 

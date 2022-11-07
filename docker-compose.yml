@@ -10,9 +10,9 @@ services:
 
 ## -- optional --
 
-##    mount the path to local output folder
+##    (1)  mount the path to local output folder
 #     - <PATH_TO_OUTPUT_FOLDER_ON_HOST>:/code/output
 
-##    mount path to self-compiled ilias downloader executable
+##    (2)  mount path to self-compiled ilias downloader executable
 ##    (for example for arm devices, as the provided one does not work here)
 #      - $HOME/.cargo/bin/KIT-ILIAS-downloader:/code/data/kit-downloader/KIT-ILIAS-downloader
