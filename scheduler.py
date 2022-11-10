@@ -31,9 +31,9 @@ class DailyTask(Task):
         self.target_time = target_time
         super().__init__(function, args)
 
-    def create_trigger(self) -> None:
+    def create_trigger(self) -> CronTrigger:
         t = datetime.time.fromisoformat(self.target_time)
-        CronTrigger(hour=t.hour, minute=t.minute, second=t.second)
+        return CronTrigger(hour=t.hour, minute=t.minute, second=t.second)
 
 
 class SingularTask(Task):
