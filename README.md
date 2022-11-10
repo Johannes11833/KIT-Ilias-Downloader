@@ -17,9 +17,13 @@ The whole list of supported clouds can be found here: https://rclone.org/
 To run this program, you need to install rclone:
 https://rclone.org/downloads/
 
+Once that is done, create a ".env" file in the project folder root containing at least
+- `ILIAS_DOWNLOADER_USER_NAME=<YOUR_USERNAME>`
+- `ILIAS_DOWNLOADER_USER_NAME=<YOUR_PASSWORD>`
+
 ### Docker Setup
 
-The easiest way to run this program is through docker. Do to so, you'll first have to manually set up a rclone remote
+The easiest way to run this program is through docker. To do so, you'll first have to manually set up a rclone remote
 (cloud) outside of docker. Run
 
 ```shell
