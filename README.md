@@ -1,3 +1,4 @@
+[<img src="https://img.shields.io/docker/v/therealjohannes/kit-ilias-downloader?label=Dockerhub">](<https://hub.docker.com/repository/docker/therealjohannes/kit-ilias-downloader>)
 # Auto KIT-Ilias Downloader
 
 The "Auto KIT-Ilias Downloader" allows you to automatically upload new files from the KIT ilias page to a cloud storage.
