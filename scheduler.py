@@ -28,7 +28,7 @@ class DailyTask(Task):
     target_time: str
 
     def __init__(
-            self, target_time: str, function: Callable, args: Dict | None = None
+        self, target_time: str, function: Callable, args: Dict | None = None
     ) -> None:
         self.target_time = target_time
         super().__init__(function, args)
@@ -42,10 +42,10 @@ class SingularTask(Task):
     target_time: datetime.datetime
 
     def __init__(
-            self,
-            target_time: datetime.datetime,
-            function: Callable,
-            args: Dict | None = None,
+        self,
+        target_time: datetime.datetime,
+        function: Callable,
+        args: Dict | None = None,
     ) -> None:
         self.target_time = target_time.astimezone(tz.tzlocal())
         super().__init__(function, args)
@@ -68,7 +68,7 @@ class TimeScheduler:
     def start(self):
         scheduler = BackgroundScheduler()
         scheduler.start()
-        logging.getLogger('apscheduler.scheduler').setLevel('WARNING')
+        logging.getLogger("apscheduler.scheduler").setLevel("WARNING")
 
         for task in self.task_list:
             trigger = task.create_trigger()
