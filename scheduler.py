@@ -1,5 +1,6 @@
 import atexit
 import datetime
+import logging
 from typing import Dict, Callable
 from abc import ABC, abstractmethod
 from dateutil import tz
@@ -18,7 +19,8 @@ class Task(ABC):
         self.args = args if args is not None else {}
 
     @abstractmethod
-    def create_trigger() -> CronTrigger:
+    def create_trigger(self) -> CronTrigger:
+
         return NotImplemented
 
 
@@ -26,7 +28,7 @@ class DailyTask(Task):
     target_time: str
 
     def __init__(
-        self, target_time: str, function: Callable, args: Dict | None = None
+            self, target_time: str, function: Callable, args: Dict | None = None
     ) -> None:
         self.target_time = target_time
         super().__init__(function, args)
@@ -40,10 +42,10 @@ class SingularTask(Task):
     target_time: datetime.datetime
 
     def __init__(
-        self,
-        target_time: datetime.datetime,
-        function: Callable,
-        args: Dict | None = None,
+            self,
+            target_time: datetime.datetime,
+            function: Callable,
+            args: Dict | None = None,
     ) -> None:
         self.target_time = target_time.astimezone(tz.tzlocal())
         super().__init__(function, args)
@@ -65,12 +67,12 @@ class TimeScheduler:
 
     def start(self):
         scheduler = BackgroundScheduler()
+        scheduler.start()
+        logging.getLogger('apscheduler.scheduler').setLevel('WARNING')
 
         for task in self.task_list:
             trigger = task.create_trigger()
             scheduler.add_job(func=task.function, trigger=trigger)
-
-        scheduler.start()
 
         # Shut down the scheduler when exiting the app
         atexit.register(lambda: scheduler.shutdown())

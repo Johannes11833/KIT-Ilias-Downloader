@@ -6,11 +6,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from threading import Event
 from typing import Dict
+
 import argh
 from argh import arg
 from dotenv import load_dotenv
-import os
-import time
 
 from files import load_json_dict, save_json_dict, get_local_file_list
 from scheduler import TimeScheduler, DailyTask, SingularTask
