@@ -15,10 +15,10 @@ from files import load_json_dict, save_json_dict, get_local_file_list
 from scheduler import TimeScheduler, DailyTask, SingularTask
 from setup_cli import setup_ilias_downloader, setup_rclone
 
-DATA_FOLDER_PATH = Path('data')
-F_NAME_REPORT = Path(DATA_FOLDER_PATH, 'ilias_upload_report.json')
+DATA_FOLDER_PATH = Path("data")
+F_NAME_REPORT = Path(DATA_FOLDER_PATH, "ilias_upload_report.json")
 EXECUTABLES_FOLDER_PATH = Path(DATA_FOLDER_PATH, "kit-downloader")
-LOCAL_DOWNLOAD_PATH = Path(DATA_FOLDER_PATH, 'output')
+LOCAL_DOWNLOAD_PATH = Path(DATA_FOLDER_PATH, "output")
 config = {}
 
 
