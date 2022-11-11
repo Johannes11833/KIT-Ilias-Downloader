@@ -165,7 +165,7 @@ def main(force_update: bool = False):
     while not set_up_complete:
         set_up_complete = setup_rclone(config, logging)
 
-    if not os.path.exists("output") or force_update:
+    if not os.path.exists(LOCAL_DOWNLOAD_PATH) or force_update:
         # this is the initial run, directly start the download and upload to the cloud
         download_ilias_data()
 
