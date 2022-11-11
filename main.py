@@ -15,8 +15,10 @@ from files import load_json_dict, save_json_dict, get_local_file_list
 from scheduler import TimeScheduler, DailyTask, SingularTask
 from setup_cli import setup_ilias_downloader, setup_rclone
 
-F_NAME_REPORT = "data/ilias_upload_report.json"
-EXECUTABLES_FOLDER_PATH = Path("data/kit-downloader")
+DATA_FOLDER_PATH = Path("data")
+F_NAME_REPORT = Path(DATA_FOLDER_PATH, "ilias_upload_report.json")
+EXECUTABLES_FOLDER_PATH = Path(DATA_FOLDER_PATH, "kit-downloader")
+LOCAL_DOWNLOAD_PATH = Path(DATA_FOLDER_PATH, "output")
 config = {}
 
 
@@ -57,7 +59,7 @@ def download_ilias_data():
     command += (
         f" -U {config['ILIAS_DOWNLOADER_USER_NAME']}"
         f" -P \"{config['ILIAS_DOWNLOADER_PASSWORD']}\""
-        f' -o "output"'
+        f' -o "{LOCAL_DOWNLOAD_PATH}"'
         f" --jobs  {config['ILIAS_DOWNLOADER_JOBS']}"
         f" --rate {config['ILIAS_DOWNLOADER_RATE']}"
     )
@@ -76,12 +78,12 @@ def download_ilias_data():
         )
 
         # upload the new file
-        upload_rclone("output", config["ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH"])
+        upload_rclone(LOCAL_DOWNLOAD_PATH, config["ILIAS_DOWNLOADER_CLOUD_OUTPUT_PATH"])
     else:
         logging.error("Download from Ilias failed.")
 
 
-def upload_rclone(output_path_local="output", output_path_remote="output"):
+def upload_rclone(output_path_local: Path, output_path_remote="output"):
     r_name = config["ILIAS_DOWNLOADER_RCLONE_REMOTE_NAME"]
 
     command = (
@@ -106,7 +108,7 @@ def upload_rclone(output_path_local="output", output_path_remote="output"):
 
 def update_report_dict() -> int:
     sync_dict = load_json_dict(F_NAME_REPORT, {"upload_events": [], "synced_files": []})
-    local_files = get_local_file_list(Path("./output"))
+    local_files = get_local_file_list(LOCAL_DOWNLOAD_PATH)
     uploaded_files = sync_dict.get("synced_files")
     upload_events = sync_dict.get("upload_events")
     new_files = list(set(local_files).difference(uploaded_files))
@@ -163,7 +165,7 @@ def main(force_update: bool = False):
     while not set_up_complete:
         set_up_complete = setup_rclone(config, logging)
 
-    if not os.path.exists("output") or force_update:
+    if not os.path.exists(LOCAL_DOWNLOAD_PATH) or force_update:
         # this is the initial run, directly start the download and upload to the cloud
         download_ilias_data()
 

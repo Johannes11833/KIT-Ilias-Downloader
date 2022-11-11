@@ -10,8 +10,8 @@ services:
 
 ## -- optional --
 
-##    (1)  mount the path to local output folder
-#     - <PATH_TO_OUTPUT_FOLDER_ON_HOST>:/code/output
+##    (1)  mount the path to local data folder to persist downloads
+#     - ./data:/code/data
 
 ##    (2)  mount path to self-compiled ilias downloader executable
 ##    (for example for arm devices, as the provided one does not work here)
