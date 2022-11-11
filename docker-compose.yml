@@ -3,6 +3,8 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      TZ: "Europe/Berlin"
     image: therealjohannes/kit-ilias-downloader
     volumes:
       # the default location of the rclone config (check with `rclone config file`)
@@ -11,7 +13,7 @@ services:
 ## -- optional --
 
 ##    (1)  mount the path to local data folder to persist downloads
-#     - ./data:/code/data
+#      - ./data:/code/data
 
 ##    (2)  mount path to self-compiled ilias downloader executable
 ##    (for example for arm devices, as the provided one does not work here)
