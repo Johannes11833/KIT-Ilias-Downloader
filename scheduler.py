@@ -36,11 +36,12 @@ class DailyTask(Task):
 
     def create_trigger(self) -> CronTrigger:
         t = datetime.time.fromisoformat(self.target_time)
-        return CronTrigger(hour=t.hour,
-                           minute=t.minute,
-                           second=t.second,
-                           timezone=str(tzlocal.get_localzone())
-                           )
+        return CronTrigger(
+            hour=t.hour,
+            minute=t.minute,
+            second=t.second,
+            timezone=str(tzlocal.get_localzone()),
+        )
 
 
 class SingularTask(Task):
@@ -63,7 +64,7 @@ class SingularTask(Task):
             hour=self.target_time.hour,
             minute=self.target_time.minute,
             second=self.target_time.second,
-            timezone=str(tzlocal.get_localzone())
+            timezone=str(tzlocal.get_localzone()),
         )
 
 
