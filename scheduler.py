@@ -3,6 +3,8 @@ import datetime
 import logging
 from typing import Dict, Callable
 from abc import ABC, abstractmethod
+
+import tzlocal
 from dateutil import tz
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -20,7 +22,6 @@ class Task(ABC):
 
     @abstractmethod
     def create_trigger(self) -> CronTrigger:
-
         return NotImplemented
 
 
@@ -35,7 +36,11 @@ class DailyTask(Task):
 
     def create_trigger(self) -> CronTrigger:
         t = datetime.time.fromisoformat(self.target_time)
-        return CronTrigger(hour=t.hour, minute=t.minute, second=t.second)
+        return CronTrigger(hour=t.hour,
+                           minute=t.minute,
+                           second=t.second,
+                           timezone=str(tzlocal.get_localzone())
+                           )
 
 
 class SingularTask(Task):
@@ -58,6 +63,7 @@ class SingularTask(Task):
             hour=self.target_time.hour,
             minute=self.target_time.minute,
             second=self.target_time.second,
+            timezone=str(tzlocal.get_localzone())
         )
 
 

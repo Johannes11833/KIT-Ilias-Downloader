@@ -1,6 +1,5 @@
 /.env
 /data/
-/output/
 /.idea/
 /.venv/
 **.pyc

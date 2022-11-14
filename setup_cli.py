@@ -21,7 +21,7 @@ def setup_ilias_downloader(logging, exec_path: Path):
     elif (unix_like() and Path(exec_path, "KIT-ILIAS-downloader").is_file()) or (
         not unix_like() and Path(exec_path, "KIT-ILIAS-downloader.exe").is_file()
     ):
-        print(f"KIT-ILIAS-downloader executable found (Unix = {unix_like()}).")
+        logging.info(f"KIT-ILIAS-downloader executable found (Unix = {unix_like()}).")
         return
 
     # get the newest release of the KIT-ILIAS-downloader through the GitHub api.
